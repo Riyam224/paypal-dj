@@ -8,4 +8,5 @@ app_name = 'product'
 urlpatterns = [
     path('' , views.index , name='index'),
     path('<int:id>/' , views.product_detail , name='product_detail'),
+    path('order_completed/' , views.order_completed , name='order_completed'),
 ]

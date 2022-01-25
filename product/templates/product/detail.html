@@ -14,9 +14,51 @@
 
 
 <!-- Include the PayPal JavaScript SDK -->
-<script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=AbH-1RoxE-pZIE3z1gY3QMLwXDoNMI0mBd-zRyLKvC0MrBD6ZdH26WOfIEqfWyj3423JQTjN-Z_PNj0v&currency=USD"></script>
 
 <script>
+
+    // 
+     var productID = '{{ product.id }}'
+    // todo csrf 
+
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+const csrftoken = getCookie('csrftoken');
+
+    // todo  after make payment 
+
+    function order_completed() {
+
+        var  url = "{% url 'product:order_completed' %}"
+        fetch( url , {
+            method : 'POST',
+            headers : {
+                //  add csrf token from django site  
+
+                 'Content-type': 'application/json',
+                 'X-CSRFToken': csrftoken,
+
+            },
+            body : JSON.stringify({'product_id': productID})
+        })
+    }
+
     // Render the PayPal button into #paypal-button-container
     paypal.Buttons({
 
@@ -25,7 +67,7 @@
             return actions.order.create({
                 purchase_units: [{
                     amount: {
-                        value:' {{ product.price }}'
+                        value:'{{ product.price }}'
                     }
                 }]
             });
@@ -36,7 +78,18 @@
             return actions.order.capture().then(function(orderData) {
                 // Successful capture! For demo purposes:
                 console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+
+
                 var transaction = orderData.purchase_units[0].payments.captures[0];
+
+                // todo  call the order_completed function  
+
+                 
+                order_completed()
+
+// ************************************************
+
+
                 alert('Transaction '+ transaction.status + ': ' + transaction.id + '\n\nSee console for all available details');
 
                 // Replace the above to show a success message within this page, e.g.
